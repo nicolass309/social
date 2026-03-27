@@ -18,9 +18,19 @@ import { initScheduler } from './lib/scheduler';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// CORS
+// CORS — supports comma-separated list of origins in FRONTEND_URL
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map(o => o.trim());
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.some(o => origin === o || origin.endsWith('.vercel.app'))) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
   credentials: true,
 }));
 
