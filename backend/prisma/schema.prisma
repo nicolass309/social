@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PlatformConnection {
+  id           String    @id @default(cuid())
+  platform     String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  accountName  String?
+  accountId    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([platform])
+}
+
+model Post {
+  id           String      @id @default(cuid())
+  title        String
+  description  String
+  videoUrl     String?
+  videoKey     String?
+  platforms    String[]
+  status       PostStatus  @default(DRAFT)
+  scheduledAt  DateTime?
+  publishedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  results      PostResult[]
+}
+
+model PostResult {
+  id           String   @id @default(cuid())
+  postId       String
+  post         Post     @relation(fields: [postId], references: [id])
+  platform     String
+  status       String
+  platformId   String?
+  platformUrl  String?
+  error        String?
+  createdAt    DateTime @default(now())
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
